@@ -2,6 +2,10 @@
     <string name="app_name">Asteroides</string>
     <string name="start_btn">Jugar</string>
     <string name="config_btn">Configurar</string>
-    <string name="about_btn">Sobre</string>
+    <string name="about_btn">Acerca de</string>
     <string name="exit_btn">Salir</string>
+    <string name="author_label">Autor</string>
+    <string name="date_label">Fecha del proyecto</string>
+    <string name="author_name">Ismael Fuentes Sintes</string>
+    <string name="creation_date">19 de Octubre de 2022</string>
 </resources>

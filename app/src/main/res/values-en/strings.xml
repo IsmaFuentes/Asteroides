@@ -5,4 +5,8 @@
     <string name="config_btn">Options</string>
     <string name="about_btn">About</string>
     <string name="exit_btn">Exit</string>
+    <string name="author_label">Author</string>
+    <string name="date_label">Project date</string>
+    <string name="author_name">Ismael Fuentes Sintes</string>
+    <string name="creation_date">19 October 2022</string>
 </resources>
