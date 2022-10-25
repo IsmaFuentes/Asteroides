@@ -9,4 +9,6 @@
     <string name="date_label">Project date</string>
     <string name="author_name">Ismael Fuentes Sintes</string>
     <string name="creation_date">19 October 2022</string>
+    <string name="menu_preferences">Preferences</string>
+    <string name="menu_about">About</string>
 </resources>
