@@ -16,7 +16,8 @@ public class MainActivity extends AppCompatActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    // Configuration...
+
+    //...
     HandleButtonsRegistration();
   }
 
@@ -27,9 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
   public boolean onOptionsItemSelected(@NonNull MenuItem item){
     switch(item.getItemId()){
-      case R.id.preferences:// arrancar actividad preferències
+      case R.id.preferences:
+        ActionStartActivity(PreferencesActivity.class);
         break;
-      case R.id.about: // arrancar activitat sobre
+      case R.id.about:
+        // Arranca la actividad "Sobre" (por ahora muestra los valores guardados en preferencias)
         break;
       default:
         break;
@@ -43,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     quitButton = findViewById(R.id.QuitButton);
     quitButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View view) { ActionFinishApplication(); }
+      public void onClick(View view) { ActionFinishActivity(); }
     });
 
     // ABOUT BUTTON
@@ -57,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
   private void ActionStartActivity(Class instance) {
     startActivity(new Intent(this, instance));
   }
-  private void ActionFinishApplication(){
+  private void ActionFinishActivity(){
     this.finish();
   }
 

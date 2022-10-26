@@ -11,4 +11,13 @@
     <string name="creation_date">19 October 2022</string>
     <string name="menu_preferences">Preferences</string>
     <string name="menu_about">About</string>
+    <string name="enable_music">Enable sound</string>
+    <string name="graphics">Graphics</string>
+    <string name="graphics_summary">Select a graphics configuration</string>
+    <string name="fragments">Number of fragments</string>
+    <string name="fragments_summary">Number of fragments generated from an asteroid destruction</string>
+    <string name="settings_multiplayer">Multiplayer settings</string>
+    <string name="enable_multiplayer">Enable multiplayer</string>
+    <string name="settings_players">Number of players</string>
+    <string name="settings_connection">Connection type</string>
 </resources>

@@ -1,0 +1,22 @@
+<resources>
+    <string-array name="graphics_options">
+        <item name="graphics_settings1">Vectorial</item>
+        <item name="graphics_settings2">Bitmap</item>
+        <item name="graphics_settings3">3D</item>
+    </string-array>
+    <string-array name="graphics_options_values">
+        <item name="graphics_type1">1</item>
+        <item name="graphics_type2">2</item>
+        <item name="graphics_type3">3</item>
+    </string-array>
+    <string-array name="connection_options">
+        <item name="connection_settings_1">Bluetooth</item>
+        <item name="connection_settings_2">Wifi</item>
+        <item name="connection_settings_3">Ethernet</item>
+    </string-array>
+    <string-array name="connection_options_values">
+        <item name="connection_type1">1</item>
+        <item name="connection_type2">2</item>
+        <item name="connection_type3">3</item>
+    </string-array>
+</resources>

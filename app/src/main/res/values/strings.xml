@@ -10,4 +10,13 @@
     <string name="creation_date">19 de Octubre de 2022</string>
     <string name="menu_preferences">Preferencias</string>
     <string name="menu_about">Sobre</string>
+    <string name="enable_music">Activar sonido</string>
+    <string name="graphics">Gráficos</string>
+    <string name="graphics_summary">Escoger la configuración de gráficos</string>
+    <string name="fragments">Número de fragmentos</string>
+    <string name="fragments_summary">Fragmentos en los que se destruye el asteroide</string>
+    <string name="settings_multiplayer">Ajustes de multijugador</string>
+    <string name="enable_multiplayer">Activar multijugador</string>
+    <string name="settings_players">Número de jugadores</string>
+    <string name="settings_connection">Tipo de conexión</string>
 </resources>
