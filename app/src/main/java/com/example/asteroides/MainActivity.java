@@ -5,18 +5,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 public class MainActivity extends AppCompatActivity {
   private Button quitButton;
   private Button aboutButton;
+  private Button playButton;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
     //...
     HandleButtonsRegistration();
   }
@@ -27,12 +28,13 @@ public class MainActivity extends AppCompatActivity {
   }
 
   public boolean onOptionsItemSelected(@NonNull MenuItem item){
+    // Menú preferencias
     switch(item.getItemId()){
       case R.id.preferences:
         ActionStartActivity(PreferencesActivity.class);
         break;
       case R.id.about:
-        // Arranca la actividad "Sobre" (por ahora muestra los valores guardados en preferencias)
+        // Arranca la actividad "Sobre
         break;
       default:
         break;
@@ -55,6 +57,18 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onClick(View view) { ActionStartActivity(AboutActivity.class); }
     });
+
+    // PLAY BUTTON
+    playButton = findViewById((R.id.StartButton));
+    playButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        ActionStartGame();
+      }
+    });
+  }
+  private void ActionStartGame(){
+    Toast.makeText(this, "Work in progres.s.", Toast.LENGTH_SHORT).show();
   }
 
   private void ActionStartActivity(Class instance) {
