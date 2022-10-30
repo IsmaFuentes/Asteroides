@@ -20,4 +20,6 @@
     <string name="enable_multiplayer">Enable multiplayer</string>
     <string name="settings_players">Number of players</string>
     <string name="settings_connection">Connection type</string>
+    <string name="score_btn">Scores</string>
+    <string name="list_empty">There are no scores</string>
 </resources>

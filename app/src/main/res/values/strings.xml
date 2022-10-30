@@ -19,4 +19,6 @@
     <string name="enable_multiplayer">Activar multijugador</string>
     <string name="settings_players">Número de jugadores</string>
     <string name="settings_connection">Tipo de conexión</string>
+    <string name="score_btn">Puntuaciones</string>
+    <string name="list_empty">No hay puntuaciones</string>
 </resources>
