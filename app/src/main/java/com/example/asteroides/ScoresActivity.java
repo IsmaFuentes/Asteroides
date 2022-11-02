@@ -2,6 +2,9 @@ package com.example.asteroides;
 
 import android.app.ListActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.Toast;
 import com.example.asteroides.models.ScoreAdapter;
 
 public class ScoresActivity extends ListActivity {
@@ -10,18 +13,13 @@ public class ScoresActivity extends ListActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_scores);
-    // setListAdapter(new ArrayAdapter(this, R.layout.element_list, R.id.ListTitle,MainActivity._store.GetScore(10)));
     setListAdapter(new ScoreAdapter(this, MainActivity._store.GetScore(10)));
   }
-}
 
-//public class ScoresActivity extends Activity {
-//
-//  @Override
-//  protected void onCreate(Bundle savedInstanceState) {
-//    super.onCreate(savedInstanceState);
-//    setContentView(R.layout.activity_scores);
-//    ListView view = findViewById(R.id.ScoresList);
-//    view.setAdapter(new ArrayAdapter(this, R.layout.element_list, R.id.ListTitle, MainActivity._store.GetScore(10)));
-//  }
-//}
+  @Override
+  protected void onListItemClick(ListView listView, View view, int position, long id){
+    super.onListItemClick(listView, view, position, id);
+    // Object o = getListAdapter().getItem(position);
+    // Toast.makeText(this, "Selecció: "  + Integer.toString(position) + " - " + o.toString(), Toast.LENGTH_LONG).show();
+  }
+}
