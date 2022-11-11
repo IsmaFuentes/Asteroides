@@ -7,4 +7,9 @@
             android:fromYDelta="800"
             android:toXDelta="0"
             android:toYDelta="0"/>
+    <alpha
+            android:startOffset="5000"
+            android:duration="1000"
+            android:fromAlpha="0"
+            android:toAlpha="1"/>
 </set>
