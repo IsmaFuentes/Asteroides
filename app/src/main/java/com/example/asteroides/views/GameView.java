@@ -25,7 +25,10 @@ public class GameView extends View {
   private int asteroidCount = 5;
   private int fragmentCount = 3;
 
-  // SHIP
+  private Drawable drawable_ship;
+  private Drawable drawable_roid;
+  private Drawable drawable_rocket;
+
   private Graphic ship;
   private int shipTurn;
   private float shipAccel;
@@ -36,62 +39,27 @@ public class GameView extends View {
 
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
-    Drawable drawableShip, drawableAsteroid, drawableRocket;
 
-    // GRAPHICS QUALITY HANDLING
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
 
     if(prefs.getString("graphics", "1").equals("1")){
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       setBackgroundColor(Color.BLACK);
-
-      // ASTEROID DRAWABLE
-      Path asteroidPath = new Path();
-      asteroidPath.moveTo((float) 0.3, (float) 0.0);
-      asteroidPath.lineTo((float) 0.6, (float) 0.0);
-      asteroidPath.lineTo((float) 0.6, (float) 0.3);
-      asteroidPath.lineTo((float) 0.8, (float) 0.2);
-      asteroidPath.lineTo((float) 1.0, (float) 0.4);
-      asteroidPath.lineTo((float) 0.8, (float) 0.6);
-      asteroidPath.lineTo((float) 0.9, (float) 0.9);
-      asteroidPath.lineTo((float) 0.8, (float) 1.0);
-      asteroidPath.lineTo((float) 0.4, (float) 1.0);
-      asteroidPath.lineTo((float) 0.0, (float) 0.6);
-      asteroidPath.lineTo((float) 0.0, (float) 0.2);
-      asteroidPath.lineTo((float) 0.3, (float) 0.0);
-      ShapeDrawable dAsteroid = new ShapeDrawable(new PathShape(asteroidPath, 1, 1));
-      dAsteroid.getPaint().setColor(Color.WHITE);
-      dAsteroid.getPaint().setStyle(Paint.Style.STROKE);
-      dAsteroid.setIntrinsicWidth(50);
-      dAsteroid.setIntrinsicHeight(50);
-      drawableAsteroid = dAsteroid;
-
-      // PLAYER DRAWABLE
-      Path playershipPath = new Path();
-      playershipPath.moveTo((float) 0.0, (float) 0.0);
-      playershipPath.lineTo((float) 0.0, (float) 1.0);
-      playershipPath.lineTo((float) 1.0, (float) 0.5);
-      playershipPath.lineTo((float) 0.0, (float) 0.0);
-
-      ShapeDrawable dShip = new ShapeDrawable(new PathShape(playershipPath, 1, 1));
-      dShip.getPaint().setColor(Color.WHITE);
-      dShip.getPaint().setStyle(Paint.Style.STROKE);
-      dShip.setIntrinsicWidth(40); // 20
-      dShip.setIntrinsicHeight(30); // 15
-      drawableShip = dShip;
+      drawable_roid = createShapedAsteroid(0.5f,0.5f, 50,50);
+      drawable_ship = createShapedShip(0.5f,0.5f,40,40);
     }else{
       setLayerType(View.LAYER_TYPE_HARDWARE, null);
-      drawableAsteroid = context.getResources().getDrawable(R.drawable.asteroid_1);
-      drawableShip = context.getResources().getDrawable(R.drawable.ship_1_normal);
+      drawable_roid = context.getResources().getDrawable(R.drawable.asteroid_1);
+      drawable_ship = context.getResources().getDrawable(R.drawable.ship_1_normal);
     }
 
     // SHIP
-    ship = new Graphic(this, drawableShip);
+    ship = new Graphic(this, drawable_ship);
 
     // ASTEROIDS
     asteroids = new ArrayList<Graphic>();
     for(int i = 0; i < asteroidCount; i++){
-      Graphic asteroid = new Graphic(this, drawableAsteroid);
+      Graphic asteroid = new Graphic(this, drawable_roid);
       asteroid.setIncY(Math.random() * 4 - 2);
       asteroid.setIncX(Math.random() * 4 - 2);
       asteroid.setAngle((int)Math.random() * 360);
@@ -100,18 +68,51 @@ public class GameView extends View {
     }
   }
 
-  private void HandleGraphicsQualityMode(){
+  private ShapeDrawable createShapedAsteroid(float sW, float sH, int width, int height){
+    Path path = new Path();
+    path.moveTo((float) 0.3, (float) 0.0);
+    path.lineTo((float) 0.6, (float) 0.0);
+    path.lineTo((float) 0.6, (float) 0.3);
+    path.lineTo((float) 0.8, (float) 0.2);
+    path.lineTo((float) 1.0, (float) 0.4);
+    path.lineTo((float) 0.8, (float) 0.6);
+    path.lineTo((float) 0.9, (float) 0.9);
+    path.lineTo((float) 0.8, (float) 1.0);
+    path.lineTo((float) 0.4, (float) 1.0);
+    path.lineTo((float) 0.0, (float) 0.6);
+    path.lineTo((float) 0.0, (float) 0.2);
+    path.lineTo((float) 0.3, (float) 0.0);
 
+    ShapeDrawable shape = new ShapeDrawable(new PathShape(path, sW, sH));
+    shape.getPaint().setColor(Color.WHITE);
+    shape.getPaint().setStyle(Paint.Style.STROKE);
+    shape.setIntrinsicWidth(width);
+    shape.setIntrinsicHeight(height);
+
+    return shape;
+  }
+
+  private ShapeDrawable createShapedShip(float sW, float sH, int width, int height){
+    Path path = new Path();
+    path.moveTo((float) 0.0, (float) 0.0);
+    path.lineTo((float) 0.0, (float) 1.0);
+    path.lineTo((float) 1.0, (float) 0.5);
+    path.lineTo((float) 0.0, (float) 0.0);
+
+    ShapeDrawable shape = new ShapeDrawable(new PathShape(path, sW, sH));
+    shape.getPaint().setColor(Color.WHITE);
+    shape.getPaint().setStyle(Paint.Style.STROKE);
+    shape.setIntrinsicWidth(width); // 20
+    shape.setIntrinsicHeight(height); // 15
+
+    return shape;
   }
 
   @Override
   protected void onSizeChanged(int w, int h, int prev_w, int prev_h){
     super.onSizeChanged(w,h, prev_w, prev_h);
-    // PLAYER SHIP
     ship.setPosX(w / 2 - ship.getWidth() / 2);
     ship.setPosY(h / 2 - ship.getHeight() / 2);
-
-    // ASTEROIDS
     for(Graphic asteroid: asteroids){
       do{
         // collision check
@@ -125,10 +126,7 @@ public class GameView extends View {
   @Override
   protected void onDraw(Canvas canvas){
     super.onDraw(canvas);
-    // PLAYER SHIP
     ship.drawGraphic(canvas);
-
-    // ASTEROIDS
     for(Graphic asteroid:asteroids){
       asteroid.drawGraphic(canvas);
     }
