@@ -42,11 +42,14 @@ public class GameView extends View {
   private static int REFRESH_RATE = 50;
   private long lastMs = 0;
 
+  // MOVEMENTS
+  private float mX;
+  private float mY;
+
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
 
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
     if(prefs.getString("graphics", "1").equals("1")){
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       setBackgroundColor(Color.BLACK);
@@ -119,8 +122,7 @@ public class GameView extends View {
     ship.setPosX(w / 2 - ship.getWidth() / 2);
     ship.setPosY(h / 2 - ship.getHeight() / 2);
     for(Graphic asteroid: asteroids){
-      do{
-        // collision check
+      do{ // collision check
         asteroid.setPosX(Math.random()* (w - asteroid.getWidth()));
         asteroid.setPosY(Math.random()* (h - asteroid.getHeight()));
       }
@@ -167,19 +169,46 @@ public class GameView extends View {
 
   public boolean onTouchEvent(MotionEvent event){
     super.onTouchEvent(event);
-
-//    float x = event.getX();
-//    float y = event.getY();
-//
-//    switch (event.getAction()){
-//      case MotionEvent.ACTION_DOWN:
-//        shoot = true;
-//        break;
-//      case MotionEvent.ACTION_MOVE:
-//        float dx = Math.abs(x - mX);
-//    }
-
+    float x = event.getX();
+    float y = event.getY();
+    switch (event.getAction()){
+      case MotionEvent.ACTION_DOWN:
+        onTouchEventDown();
+        break;
+      case MotionEvent.ACTION_MOVE:
+        onTouchEventMove(x, y);
+        break;
+      case MotionEvent.ACTION_UP:
+        onTouchEventUp();
+        break;
+    }
+    mX = x;
+    mY = y;
     return true;
+  }
+
+  private void onTouchEventMove(float x, float y){
+    float diff_x = Math.abs(x - mX);
+    float diff_y = mY - y; // float dy = Math.abs(y - mY);
+    if(diff_y < 6 && diff_x > 6){
+      shipAngle = Math.round((x - mX) / 2);
+      shoot = false;
+    }else if(diff_x < 6 && diff_y > 6){
+      shipAccel = Math.round((mY - y) / 25);
+      shoot = false;
+    }
+  }
+
+  public void onTouchEventUp(){
+    shipAngle = 0;
+    shipAccel = 0;
+    if(shoot){
+      // activateMisile();
+    }
+  }
+
+  public void onTouchEventDown(){
+    shoot = true;
   }
 
   public boolean onKeyDown(int keyCode, KeyEvent event){
