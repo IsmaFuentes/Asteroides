@@ -10,15 +10,15 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.PathShape;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 import androidx.preference.PreferenceManager;
 import com.example.asteroides.R;
 import com.example.asteroides.models.Graphic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 public class GameView extends View {
   private List<Graphic> asteroids;
@@ -30,12 +30,17 @@ public class GameView extends View {
   private Drawable drawable_rocket;
 
   private Graphic ship;
-  private int shipTurn;
+  private int shipAngle;
   private float shipAccel;
-
-  private static final int SHIP_TURN_TICK = 5;
+  private boolean shoot;
+  private static final int SHIP_ANGLE_TICK = 5;
   private static final float SHIP_ACCEL_TICK = 0.5f;
   private static final double SHIP_MAX_VELOCITY = 50;
+
+  // THREAD + TIMINGS
+  private GameThread thread = new GameThread();
+  private static int REFRESH_RATE = 50;
+  private long lastMs = 0;
 
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
@@ -121,14 +126,117 @@ public class GameView extends View {
       }
       while(asteroid.distance(ship) < (w + h) / 5);
     }
+
+    lastMs = System.currentTimeMillis();
+    thread.start();
   }
 
   @Override
-  protected void onDraw(Canvas canvas){
+  protected synchronized void onDraw(Canvas canvas){
     super.onDraw(canvas);
     ship.drawGraphic(canvas);
     for(Graphic asteroid:asteroids){
       asteroid.drawGraphic(canvas);
+    }
+  }
+
+  protected synchronized void updatePhysics(){
+    long now = System.currentTimeMillis();
+
+    if(lastMs + REFRESH_RATE > now){
+      return;
+    }
+
+    double delay = (now - lastMs) / REFRESH_RATE;
+    lastMs = now;
+
+    ship.setAngle((int) (ship.getAngle() + shipAngle * delay));
+    double nIncX = ship.getIncX() + shipAccel * Math.cos(Math.toRadians(ship.getAngle())) * delay;
+    double nIncY = ship.getIncY() + shipAccel * Math.sin(Math.toRadians(ship.getAngle())) * delay;
+
+    if (Math.hypot(nIncX,nIncY) <= SHIP_MAX_VELOCITY){
+      ship.setIncX(nIncX);
+      ship.setIncY(nIncY);
+    }
+
+    ship.incrementPosition(delay);
+    for (Graphic roid : asteroids) {
+      roid.incrementPosition(delay);
+    }
+  }
+
+  public boolean onTouchEvent(MotionEvent event){
+    super.onTouchEvent(event);
+
+//    float x = event.getX();
+//    float y = event.getY();
+//
+//    switch (event.getAction()){
+//      case MotionEvent.ACTION_DOWN:
+//        shoot = true;
+//        break;
+//      case MotionEvent.ACTION_MOVE:
+//        float dx = Math.abs(x - mX);
+//    }
+
+    return true;
+  }
+
+  public boolean onKeyDown(int keyCode, KeyEvent event){
+    super.onKeyDown(keyCode, event);
+    boolean processed = true;
+
+    switch (keyCode){
+      case KeyEvent.KEYCODE_DPAD_UP:
+        shipAccel = +SHIP_ACCEL_TICK;
+        break;
+      case KeyEvent.KEYCODE_DPAD_LEFT:
+        shipAngle = -SHIP_ANGLE_TICK;
+        break;
+      case KeyEvent.KEYCODE_DPAD_RIGHT:
+        shipAngle = +SHIP_ANGLE_TICK;
+        break;
+      case KeyEvent.KEYCODE_DPAD_CENTER:
+      case KeyEvent.KEYCODE_ENTER:
+        // TODO: shotMisile
+        break;
+      default:
+        processed = false;
+        break;
+    }
+
+    return processed;
+  }
+
+  public  boolean onKeyUp(int keyCode, KeyEvent event){
+    super.onKeyUp(keyCode, event);
+    boolean processed = true;
+
+    switch (keyCode){
+      case KeyEvent.KEYCODE_DPAD_UP:
+        shipAccel = 0;
+        break;
+      case KeyEvent.KEYCODE_DPAD_LEFT:
+      case KeyEvent.KEYCODE_DPAD_RIGHT:
+        shipAngle = 0;
+        break;
+      case KeyEvent.KEYCODE_ENTER:
+        // TODO: shotMisile
+        break;
+      default:
+        processed = false;
+        break;
+    }
+
+    return processed;
+  }
+
+  public class GameThread extends Thread {
+    @Override
+    public void run(){
+      while(true){
+        updatePhysics();
+      }
     }
   }
 }

@@ -34,7 +34,7 @@ public class Graphic {
     canvas.restore();
 
     int rInval = (int)Math.hypot(width, height) / 2 + MAX_VELOCITY;
-    view.invalidate(x - rInval, y-rInval, x+rInval, y+rInval);
+    view.invalidate(x - rInval, y - rInval, x + rInval, y + rInval);
   }
 
   public int getWidth(){
@@ -44,6 +44,9 @@ public class Graphic {
   public int getHeight(){
     return this.height;
   }
+  public int getAngle() { return this.angle; }
+  public double getIncX() { return this.incX; }
+  public double getIncY() { return this.incY; }
 
   public void setPosX(double x){
     this.posX = x;
@@ -72,21 +75,25 @@ public class Graphic {
   public void incrementPosition(double factor){
     posX += incX * factor;
 
-    if(posX<-width / 2){
+    if(posX < -width / 2){
       posX = view.getWidth() - width / 2;
     }
 
     if(posX > view.getWidth() - width / 2){
-      posY += incY * factor;
+      posX = -width / 2;
     }
 
-    if(posY<-height / 2){
+    posY += incY * factor;
+
+    if(posY < -height / 2){
       posY = view.getHeight() - height / 2;
     }
 
     if(posY > view.getHeight() - height / 2){
       posY = -height / 2;
     }
+
+    angle += rotation * factor;
   }
 
   public double distance(Graphic g){
