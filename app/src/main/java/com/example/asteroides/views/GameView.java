@@ -118,16 +118,16 @@ public class GameView extends View implements SensorEventListener {
     // ángulo de rotación
     shipAngle = (int)(y - sensor_y);
 
-    float diff_z = sensor_z - z;
+    float diff_z = z - sensor_z;
     float thresh = 1.5f; // margen inclinación eje z
     float df_abs = Math.abs(diff_z);
 
-    if(diff_z < 0 && df_abs > thresh){ // Aceleración
+    if(diff_z > 0 && df_abs > thresh){ // Aceleración
       Log.i("[MOV]", "UP difference: " + diff_z);
       shipAccel = SHIP_ACCEL_TICK / 3;
     }
 
-    if(diff_z > 0 && df_abs > thresh){ // Desaceleración
+    if(diff_z < 0 && df_abs > thresh){ // Desaceleración
       Log.i("[MOV]", "DP difference: " + diff_z);
       shipAccel = -SHIP_ACCEL_TICK / 3;
     }
