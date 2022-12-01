@@ -9,7 +9,12 @@ import android.graphics.Path;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.PathShape;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,7 +25,7 @@ import com.example.asteroides.models.Graphic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameView extends View {
+public class GameView extends View implements SensorEventListener {
   private List<Graphic> asteroids;
   private int asteroidCount = 5;
   private int fragmentCount = 3;
@@ -46,8 +51,19 @@ public class GameView extends View {
   private float mX;
   private float mY;
 
+  // SENSORS
+  private SensorManager sensorManager;
+  private boolean sensor_y_exists = false;
+  private boolean sensor_z_exists = false;
+
+  private float sensor_y = 0;
+  private float sensor_z = 0;
+
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
+
+    // Mantiene la pantalla en marcha mientras el juego esté en marcha
+    this.setKeepScreenOn(true);
 
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
     if(prefs.getString("graphics", "1").equals("1")){
@@ -70,10 +86,60 @@ public class GameView extends View {
       Graphic asteroid = new Graphic(this, drawable_roid);
       asteroid.setIncY(Math.random() * 4 - 2);
       asteroid.setIncX(Math.random() * 4 - 2);
-      asteroid.setAngle((int)Math.random() * 360);
-      asteroid.setRotation((int)Math.random() * 8 - 4);
+      asteroid.setAngle((int)(Math.random() * 360));
+      asteroid.setRotation((int)((Math.random() * 8) - 4));
       asteroids.add(asteroid);
     }
+
+    sensorManager = (SensorManager)context.getSystemService(context.SENSOR_SERVICE);
+    List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+    if(!sensors.isEmpty()){
+      Sensor accelSensor = sensors.get(0);
+      sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME);
+    }
+  }
+
+  @Override
+  public void onSensorChanged(SensorEvent sensorEvent){
+    // x = 0, y = 1, z = 2
+    float y = sensorEvent.values[1];
+    float z = sensorEvent.values[2];
+
+    if(!sensor_y_exists){ // Valor inicial y
+      sensor_y = y;
+      sensor_y_exists = true;
+    }
+
+    if(!sensor_z_exists){ // Valor inicial z
+      sensor_z = z;
+      sensor_z_exists = true;
+    }
+
+    // ángulo de rotación
+    shipAngle = (int)(y - sensor_y);
+
+    float diff_z = sensor_z - z;
+    float thresh = 1.5f; // margen inclinación eje z
+    float df_abs = Math.abs(diff_z);
+
+    if(diff_z < 0 && df_abs > thresh){ // Aceleración
+      Log.i("[MOV]", "UP difference: " + diff_z);
+      shipAccel = SHIP_ACCEL_TICK / 3;
+    }
+
+    if(diff_z > 0 && df_abs > thresh){ // Desaceleración
+      Log.i("[MOV]", "DP difference: " + diff_z);
+      shipAccel = -SHIP_ACCEL_TICK / 3;
+    }
+
+    if(df_abs < thresh){ // Punto muerto
+      shipAccel = 0;
+    }
+  }
+
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int i){
+
   }
 
   private ShapeDrawable createShapedAsteroid(float sW, float sH, int width, int height){
@@ -110,8 +176,8 @@ public class GameView extends View {
     ShapeDrawable shape = new ShapeDrawable(new PathShape(path, sW, sH));
     shape.getPaint().setColor(Color.WHITE);
     shape.getPaint().setStyle(Paint.Style.STROKE);
-    shape.setIntrinsicWidth(width); // 20
-    shape.setIntrinsicHeight(height); // 15
+    shape.setIntrinsicWidth(width);
+    shape.setIntrinsicHeight(height);
 
     return shape;
   }
@@ -122,9 +188,9 @@ public class GameView extends View {
     ship.setPosX(w / 2 - ship.getWidth() / 2);
     ship.setPosY(h / 2 - ship.getHeight() / 2);
     for(Graphic asteroid: asteroids){
-      do{ // collision check
-        asteroid.setPosX(Math.random()* (w - asteroid.getWidth()));
-        asteroid.setPosY(Math.random()* (h - asteroid.getHeight()));
+      do{ // check distancia nave / asteroides
+        asteroid.setPosX(Math.random() * (w - asteroid.getWidth()));
+        asteroid.setPosY(Math.random() * (h - asteroid.getHeight()));
       }
       while(asteroid.distance(ship) < (w + h) / 5);
     }
@@ -152,11 +218,11 @@ public class GameView extends View {
     double delay = (now - lastMs) / REFRESH_RATE;
     lastMs = now;
 
-    ship.setAngle((int) (ship.getAngle() + shipAngle * delay));
+    ship.setAngle((int)(ship.getAngle() + shipAngle * delay));
     double nIncX = ship.getIncX() + shipAccel * Math.cos(Math.toRadians(ship.getAngle())) * delay;
     double nIncY = ship.getIncY() + shipAccel * Math.sin(Math.toRadians(ship.getAngle())) * delay;
 
-    if (Math.hypot(nIncX,nIncY) <= SHIP_MAX_VELOCITY){
+    if (Math.hypot(nIncX, nIncY) <= SHIP_MAX_VELOCITY){
       ship.setIncX(nIncX);
       ship.setIncY(nIncY);
     }
@@ -188,12 +254,13 @@ public class GameView extends View {
   }
 
   private void onTouchEventMove(float x, float y){
+    int drag_distance = 6;
     float diff_x = Math.abs(x - mX);
     float diff_y = mY - y; // float dy = Math.abs(y - mY);
-    if(diff_y < 6 && diff_x > 6){
+    if(diff_y < drag_distance && diff_x > drag_distance){
       shipAngle = Math.round((x - mX) / 2);
       shoot = false;
-    }else if(diff_x < 6 && diff_y > 6){
+    }else if(diff_x < drag_distance && diff_y > drag_distance){
       shipAccel = Math.round((mY - y) / 25);
       shoot = false;
     }

@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -34,6 +35,12 @@ public class MainActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     // Puntuaciones
     _store = new ScoreStore();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+
     // Configuración
     HandleButtonsRegistration();
 

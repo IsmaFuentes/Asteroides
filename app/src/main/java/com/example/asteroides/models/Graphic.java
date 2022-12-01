@@ -29,11 +29,11 @@ public class Graphic {
     int y = (int)(posY + height / 2);
 
     canvas.rotate((float)angle, (float)x, (float)y);
-    drawable.setBounds((int)posX, (int)posY, (int)posX + width, (int)posY + height);
+    drawable.setBounds((int)posX, (int)posY, (int)(posX + width), (int)(posY + height));
     drawable.draw(canvas);
     canvas.restore();
 
-    int rInval = (int)Math.hypot(width, height) / 2 + MAX_VELOCITY;
+    int rInval = (int)(Math.hypot(width, height) / 2 + MAX_VELOCITY);
     view.invalidate(x - rInval, y - rInval, x + rInval, y + rInval);
   }
 
@@ -44,9 +44,15 @@ public class Graphic {
   public int getHeight(){
     return this.height;
   }
-  public int getAngle() { return this.angle; }
-  public double getIncX() { return this.incX; }
-  public double getIncY() { return this.incY; }
+  public int getAngle() {
+    return this.angle;
+  }
+  public double getIncX() {
+    return this.incX;
+  }
+  public double getIncY() {
+    return this.incY;
+  }
 
   public void setPosX(double x){
     this.posX = x;
