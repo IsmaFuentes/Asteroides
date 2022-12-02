@@ -1,6 +1,7 @@
 package com.example.asteroides.models;
 
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -29,12 +30,11 @@ public class Graphic {
     int y = (int)(posY + height / 2);
 
     canvas.rotate((float)angle, (float)x, (float)y);
-    drawable.setBounds((int)posX, (int)posY, (int)(posX + width), (int)(posY + height));
+    drawable.setBounds((int)posX, (int)posY, (int)(posX + (width / 2)), (int)(posY + (height / 2)));
     drawable.draw(canvas);
     canvas.restore();
 
-    int rInval = (int)(Math.hypot(width, height) / 2 + MAX_VELOCITY);
-    view.invalidate(x - rInval, y - rInval, x + rInval, y + rInval);
+    view.invalidate();
   }
 
   public int getWidth(){

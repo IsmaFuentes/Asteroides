@@ -61,7 +61,6 @@ public class GameView extends View implements SensorEventListener {
 
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
-
     // Mantiene la pantalla en marcha mientras el juego esté en marcha
     this.setKeepScreenOn(true);
 
@@ -70,7 +69,7 @@ public class GameView extends View implements SensorEventListener {
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       setBackgroundColor(Color.BLACK);
       drawable_roid = createShapedAsteroid(0.5f,0.5f, 50,50);
-      drawable_ship = createShapedShip(0.5f,0.5f,40,40);
+      drawable_ship = createShapedShip(0.5f,0.5f,50,50);
     }else{
       setLayerType(View.LAYER_TYPE_HARDWARE, null);
       drawable_roid = context.getResources().getDrawable(R.drawable.asteroid_1);
@@ -123,12 +122,12 @@ public class GameView extends View implements SensorEventListener {
     float df_abs = Math.abs(diff_z);
 
     if(diff_z > 0 && df_abs > thresh){ // Aceleración
-      Log.i("[MOV]", "UP difference: " + diff_z);
+      Log.i("[MOV]", "Diferencia inclinación: " + diff_z);
       shipAccel = SHIP_ACCEL_TICK / 3;
     }
 
     if(diff_z < 0 && df_abs > thresh){ // Desaceleración
-      Log.i("[MOV]", "DP difference: " + diff_z);
+      Log.i("[MOV]", "Diferencia declinación: " + diff_z);
       shipAccel = -SHIP_ACCEL_TICK / 3;
     }
 
@@ -228,6 +227,7 @@ public class GameView extends View implements SensorEventListener {
     }
 
     ship.incrementPosition(delay);
+
     for (Graphic roid : asteroids) {
       roid.incrementPosition(delay);
     }
