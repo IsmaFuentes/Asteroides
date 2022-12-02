@@ -50,6 +50,10 @@ public class GameView extends View implements SensorEventListener {
   // MOVEMENTS
   private float mX;
   private float mY;
+  private int choosenControl;
+  private static final int CONTROLS_KEYBOARD = 1;
+  private static final int CONTROLS_TOUCHPAD = 2;
+  private static final int CONTROLS_SENSORS = 3;
 
   // SENSORS
   private SensorManager sensorManager;
@@ -61,10 +65,15 @@ public class GameView extends View implements SensorEventListener {
 
   public GameView(Context context, AttributeSet attrs){
     super(context, attrs);
+
     // Mantiene la pantalla en marcha mientras el juego esté en marcha
     this.setKeepScreenOn(true);
 
+    // Preferencias de usuario
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+    handlePreferences(prefs);
+
     if(prefs.getString("graphics", "1").equals("1")){
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       setBackgroundColor(Color.BLACK);
@@ -90,11 +99,30 @@ public class GameView extends View implements SensorEventListener {
       asteroids.add(asteroid);
     }
 
-    sensorManager = (SensorManager)context.getSystemService(context.SENSOR_SERVICE);
-    List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-    if(!sensors.isEmpty()){
-      Sensor accelSensor = sensors.get(0);
-      sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME);
+    if(choosenControl == CONTROLS_SENSORS){
+      // Registramos los sensores de movimiento solo si el usuario los ha elegido como tipo de entrada
+      sensorManager = (SensorManager)context.getSystemService(context.SENSOR_SERVICE);
+      List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+      if(!sensors.isEmpty()){
+        Sensor accelSensor = sensors.get(0);
+        sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME);
+      }
+    }
+  }
+
+  private void handlePreferences (SharedPreferences prefs){
+    switch (prefs.getString("controls", "1")){
+      case "1": // TECLADO
+        choosenControl = CONTROLS_KEYBOARD;
+        break;
+      case "2": // TOUCHPAD
+        choosenControl = CONTROLS_TOUCHPAD;
+        break;
+      case "3": // SENSORES
+        choosenControl = CONTROLS_SENSORS;
+        break;
+      default:
+        break;
     }
   }
 
@@ -118,20 +146,20 @@ public class GameView extends View implements SensorEventListener {
     shipAngle = (int)(y - sensor_y);
 
     float diff_z = z - sensor_z;
-    float thresh = 1.5f; // margen inclinación eje z
-    float df_abs = Math.abs(diff_z);
+    float threshold = 1.5f; // margen inclinación eje z
+    float total_dif = Math.abs(diff_z);
 
-    if(diff_z > 0 && df_abs > thresh){ // Aceleración
+    if(diff_z > 0 && total_dif > threshold){ // Aceleración
       Log.i("[MOV]", "Diferencia inclinación: " + diff_z);
       shipAccel = SHIP_ACCEL_TICK / 3;
     }
 
-    if(diff_z < 0 && df_abs > thresh){ // Desaceleración
+    if(diff_z < 0 && total_dif > threshold){ // Desaceleración
       Log.i("[MOV]", "Diferencia declinación: " + diff_z);
       shipAccel = -SHIP_ACCEL_TICK / 3;
     }
 
-    if(df_abs < thresh){ // Punto muerto
+    if(total_dif < threshold){ // Punto muerto
       shipAccel = 0;
     }
   }
@@ -235,21 +263,25 @@ public class GameView extends View implements SensorEventListener {
 
   public boolean onTouchEvent(MotionEvent event){
     super.onTouchEvent(event);
-    float x = event.getX();
-    float y = event.getY();
-    switch (event.getAction()){
-      case MotionEvent.ACTION_DOWN:
-        onTouchEventDown();
-        break;
-      case MotionEvent.ACTION_MOVE:
-        onTouchEventMove(x, y);
-        break;
-      case MotionEvent.ACTION_UP:
-        onTouchEventUp();
-        break;
+
+    if(choosenControl == CONTROLS_TOUCHPAD){
+      float x = event.getX();
+      float y = event.getY();
+      switch (event.getAction()){
+        case MotionEvent.ACTION_DOWN:
+          shoot = true;
+          break;
+        case MotionEvent.ACTION_MOVE:
+          onTouchEventMove(x, y);
+          break;
+        case MotionEvent.ACTION_UP:
+          onTouchEventUp();
+          break;
+      }
+      mX = x;
+      mY = y;
     }
-    mX = x;
-    mY = y;
+
     return true;
   }
 
@@ -280,25 +312,27 @@ public class GameView extends View implements SensorEventListener {
 
   public boolean onKeyDown(int keyCode, KeyEvent event){
     super.onKeyDown(keyCode, event);
-    boolean processed = true;
 
-    switch (keyCode){
-      case KeyEvent.KEYCODE_DPAD_UP:
-        shipAccel = +SHIP_ACCEL_TICK;
-        break;
-      case KeyEvent.KEYCODE_DPAD_LEFT:
-        shipAngle = -SHIP_ANGLE_TICK;
-        break;
-      case KeyEvent.KEYCODE_DPAD_RIGHT:
-        shipAngle = +SHIP_ANGLE_TICK;
-        break;
-      case KeyEvent.KEYCODE_DPAD_CENTER:
-      case KeyEvent.KEYCODE_ENTER:
-        // TODO: shotMisile
-        break;
-      default:
-        processed = false;
-        break;
+    boolean processed = true;
+    if(choosenControl == CONTROLS_KEYBOARD){
+      switch (keyCode){
+        case KeyEvent.KEYCODE_DPAD_UP:
+          shipAccel = +SHIP_ACCEL_TICK;
+          break;
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+          shipAngle = -SHIP_ANGLE_TICK;
+          break;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          shipAngle = +SHIP_ANGLE_TICK;
+          break;
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+        case KeyEvent.KEYCODE_ENTER:
+          // TODO: shotMisile
+          break;
+        default:
+          processed = false;
+          break;
+      }
     }
 
     return processed;
@@ -306,22 +340,24 @@ public class GameView extends View implements SensorEventListener {
 
   public  boolean onKeyUp(int keyCode, KeyEvent event){
     super.onKeyUp(keyCode, event);
-    boolean processed = true;
 
-    switch (keyCode){
-      case KeyEvent.KEYCODE_DPAD_UP:
-        shipAccel = 0;
-        break;
-      case KeyEvent.KEYCODE_DPAD_LEFT:
-      case KeyEvent.KEYCODE_DPAD_RIGHT:
-        shipAngle = 0;
-        break;
-      case KeyEvent.KEYCODE_ENTER:
-        // TODO: shotMisile
-        break;
-      default:
-        processed = false;
-        break;
+    boolean processed = true;
+    if(choosenControl == CONTROLS_KEYBOARD){
+      switch (keyCode){
+        case KeyEvent.KEYCODE_DPAD_UP:
+          shipAccel = 0;
+          break;
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          shipAngle = 0;
+          break;
+        case KeyEvent.KEYCODE_ENTER:
+          // TODO: shotMisile
+          break;
+        default:
+          processed = false;
+          break;
+      }
     }
 
     return processed;

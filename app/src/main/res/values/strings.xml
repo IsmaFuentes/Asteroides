@@ -21,4 +21,9 @@
     <string name="settings_connection">Tipo de conexión</string>
     <string name="score_btn">Puntuaciones</string>
     <string name="list_empty">No hay puntuaciones</string>
+    <string name="controls">Controles</string>
+    <string name="controls_summary">Tipo de entrada por defecto</string>
+    <string name="option_keyboard">Teclado</string>
+    <string name="option_touchpad">Pantalla táctil</string>
+    <string name="option_sensors">Sensores de movimiento</string>
 </resources>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
     <CheckBoxPreference
         android:key="enable_music"
         android:title="@string/enable_music"
@@ -18,6 +19,15 @@
         android:summary="@string/fragments_summary"
         android:inputType="number"
         android:defaultValue="3"
+    />
+    <ListPreference
+            android:key="controls"
+            android:title="@string/controls"
+            android:summary="@string/controls_summary"
+            android:entries="@array/control_options"
+            android:entryValues="@array/control_options_values"
+            android:inputType="number"
+            android:defaultValue="2"
     />
     <PreferenceCategory android:title="@string/settings_multiplayer">
         <CheckBoxPreference

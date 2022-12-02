@@ -19,4 +19,14 @@
         <item name="connection_type2">2</item>
         <item name="connection_type3">3</item>
     </string-array>
+    <string-array name="control_options">
+        <item name="control_keyboard">@string/option_keyboard</item>
+        <item name="control_touchpad">@string/option_touchpad</item>
+        <item name="control_sensor">@string/option_sensors</item>
+    </string-array>
+    <string-array name="control_options_values">
+        <item name="control_keyboard">1</item>
+        <item name="control_touchpad">2</item>
+        <item name="control_sensor">3</item>
+    </string-array>
 </resources>

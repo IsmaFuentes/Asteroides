@@ -22,4 +22,9 @@
     <string name="settings_connection">Connection type</string>
     <string name="score_btn">Scores</string>
     <string name="list_empty">There are no scores</string>
+    <string name="controls">Controls</string>
+    <string name="controls_summary">Prefered movement type</string>
+    <string name="option_keyboard">Keyboard</string>
+    <string name="option_touchpad">Touchpad</string>
+    <string name="option_sensors">Movement sensors</string>
 </resources>
