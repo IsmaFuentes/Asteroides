@@ -86,7 +86,7 @@ public class GameView extends View implements SensorEventListener {
       // Vectorial
       setLayerType(View.LAYER_TYPE_SOFTWARE, null);
       setBackgroundColor(Color.BLACK);
-      drawable_roid = createShapedAsteroid(0.5f,0.5f, 50,50);
+      drawable_roid = createShapedAsteroid(1f,1f, 50,50);
       drawable_ship = createShapedShip(1f,1f,50,40);
       drawable_missile = createShapedMissile(15, 3);
     }else{
@@ -224,12 +224,12 @@ public class GameView extends View implements SensorEventListener {
     return shape;
   }
 
-  private ShapeDrawable createShapedMissile(int width, int heigth){
+  private ShapeDrawable createShapedMissile(int width, int height){
     ShapeDrawable dMissile = new ShapeDrawable(new RectShape());
     dMissile.getPaint().setColor(Color.WHITE);
     dMissile.getPaint().setStyle(Paint.Style.STROKE);
     dMissile.setIntrinsicWidth(width); // 15
-    dMissile.setIntrinsicHeight(heigth); // 3
+    dMissile.setIntrinsicHeight(height); // 3
     return dMissile;
   }
 
@@ -286,10 +286,6 @@ public class GameView extends View implements SensorEventListener {
 
     ship.incrementPosition(delay);
 
-    for (Graphic roid : asteroids) {
-      roid.incrementPosition(delay);
-    }
-
     if (missileActive) {
       missile.incrementPosition(delay);
       missileMs -= delay;
@@ -303,6 +299,10 @@ public class GameView extends View implements SensorEventListener {
             break;
           }
       }
+    }
+
+    for (Graphic roid: asteroids) {
+      roid.incrementPosition(delay);
     }
   }
 
@@ -352,8 +352,6 @@ public class GameView extends View implements SensorEventListener {
   }
 
   public void activateMisile(){
-//    missile.setPosX(ship.getPosX() + ship.getHeight());
-//    missile.setPosY(ship.getPosY() + ship.getWidth() / 2);
     missile.setPosX(ship.getPosX() + ship.getWidth() / 2 - missile.getWidth() / 2);
     missile.setPosY(ship.getPosY() + ship.getHeight() / 2 - missile.getHeight() / 2);
     missile.setAngle(ship.getAngle());

@@ -21,7 +21,7 @@ public class Graphic {
     this.drawable = drawable;
     width = drawable.getIntrinsicWidth();
     height = drawable.getIntrinsicHeight();
-    collisionRadius = (height / width) / 4;
+    collisionRadius = (height + width) / 4;
   }
 
   public void drawGraphic(Canvas canvas){
