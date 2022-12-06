@@ -30,7 +30,7 @@ public class Graphic {
     int y = (int)(posY + height / 2);
 
     canvas.rotate((float)angle, (float)x, (float)y);
-    drawable.setBounds((int)posX, (int)posY, (int)(posX + (width / 2)), (int)(posY + (height / 2)));
+    drawable.setBounds((int)posX, (int)posY, (int)(posX + width), (int)(posY + height));
     drawable.draw(canvas);
     canvas.restore();
 
@@ -52,6 +52,14 @@ public class Graphic {
   }
   public double getIncY() {
     return this.incY;
+  }
+
+  public double getPosX(){
+    return this.posX;
+  }
+
+  public double getPosY(){
+    return this.posY;
   }
 
   public void setPosX(double x){
