@@ -28,6 +28,7 @@ import java.util.List;
 
 public class GameView extends View implements SensorEventListener {
   private List<Graphic> asteroids;
+  private List<Graphic> missiles;
   private int asteroidCount = 5;
   private int fragmentCount = 3;
 
@@ -46,10 +47,8 @@ public class GameView extends View implements SensorEventListener {
   private static final double SHIP_MAX_VELOCITY = 50;
 
   // MISILES
-  private Graphic missile;
   private static int MISSILE_VELOCITY_TICK = 12;
-  private boolean missileActive = false;
-  private int missileMs;
+  private List<Integer> missileTimes;
 
   // THREAD + TIMINGS
   private GameThread thread = new GameThread();
@@ -101,7 +100,8 @@ public class GameView extends View implements SensorEventListener {
     ship = new Graphic(this, drawable_ship);
 
     // MISSILE
-    missile = new Graphic(this, drawable_missile);
+    missiles = new ArrayList<Graphic>();
+    missileTimes = new ArrayList<Integer>();
 
     // ASTEROIDS
     asteroids = new ArrayList<Graphic>();
@@ -161,20 +161,13 @@ public class GameView extends View implements SensorEventListener {
     shipAngle = (int)(y - sensor_y);
 
     float diff_z = z - sensor_z;
-    float threshold = 1.5f; // margen inclinación eje z
-    float total_dif = Math.abs(diff_z);
+    Log.i("[MOV]", "Diferencia inclinación: " + diff_z);
 
-    if(diff_z > 0 && total_dif > threshold){ // Aceleración
-      Log.i("[MOV]", "Diferencia inclinación: " + diff_z);
+    if(diff_z > 0){
       shipAccel = SHIP_ACCEL_TICK / 3;
-    }
-
-    if(diff_z < 0 && total_dif > threshold){ // Desaceleración
-      Log.i("[MOV]", "Diferencia declinación: " + diff_z);
+    } else if(diff_z < 0){
       shipAccel = -SHIP_ACCEL_TICK / 3;
-    }
-
-    if(total_dif < threshold){ // Punto muerto
+    }else{
       shipAccel = 0;
     }
   }
@@ -256,9 +249,10 @@ public class GameView extends View implements SensorEventListener {
 
     ship.drawGraphic(canvas);
 
-    if(missileActive) {
+    for(Graphic missile:missiles){
       missile.drawGraphic(canvas);
     }
+
 
     for(Graphic asteroid:asteroids){
       asteroid.drawGraphic(canvas);
@@ -286,16 +280,20 @@ public class GameView extends View implements SensorEventListener {
 
     ship.incrementPosition(delay);
 
-    if (missileActive) {
+    for(int x = 0; x < missiles.size(); x++){
+      Graphic missile = missiles.get(x);
+      int missileMs = missileTimes.get(x);
+
       missile.incrementPosition(delay);
       missileMs -= delay;
-      if (missileMs < 0) {
-        missileActive = false;
-      } else {
+      missileTimes.set(x, missileMs);
+      if (missileMs < 0){ // < 0
+        destroyMissile(x);
+      } else{
         for (int i = 0; i < asteroids.size(); i++)
           if (missile.verifyCollision(asteroids.get(i))) {
-            Log.i("[COLLISION]", "Asteroid destroyed");
             destroyAsteroid(i);
+            destroyMissile(x);
             break;
           }
       }
@@ -309,37 +307,37 @@ public class GameView extends View implements SensorEventListener {
   public boolean onTouchEvent(MotionEvent event){
     super.onTouchEvent(event);
 
-    if(choosenControl == CONTROLS_TOUCHPAD){
-      float x = event.getX();
-      float y = event.getY();
-      switch (event.getAction()){
-        case MotionEvent.ACTION_DOWN:
-          shoot = true;
-          break;
-        case MotionEvent.ACTION_MOVE:
-          onTouchEventMove(x, y);
-          break;
-        case MotionEvent.ACTION_UP:
-          onTouchEventUp();
-          break;
-      }
-      mX = x;
-      mY = y;
+    float x = event.getX();
+    float y = event.getY();
+    switch (event.getAction()){
+      case MotionEvent.ACTION_DOWN:
+        shoot = true;
+        break;
+      case MotionEvent.ACTION_MOVE:
+        onTouchEventMove(x, y);
+        break;
+      case MotionEvent.ACTION_UP:
+        onTouchEventUp();
+        break;
     }
+    mX = x;
+    mY = y;
 
     return true;
   }
 
   private void onTouchEventMove(float x, float y){
-    int drag_distance = 6;
-    float diff_x = Math.abs(x - mX);
-    float diff_y = mY - y; // float dy = Math.abs(y - mY);
-    if(diff_y < drag_distance && diff_x > drag_distance){
-      shipAngle = Math.round((x - mX) / 2);
-      shoot = false;
-    }else if(diff_x < drag_distance && diff_y > drag_distance){
-      shipAccel = Math.round((mY - y) / 25);
-      shoot = false;
+    if(choosenControl == CONTROLS_TOUCHPAD){
+      int drag_distance = 6;
+      float diff_x = Math.abs(x - mX);
+      float diff_y = mY - y; // float dy = Math.abs(y - mY);
+      if(diff_y < drag_distance && diff_x > drag_distance){
+        shipAngle = Math.round((x - mX) / 2);
+        shoot = false;
+      }else if(diff_x < drag_distance && diff_y > drag_distance){
+        shipAccel = Math.round((mY - y) / 25);
+        shoot = false;
+      }
     }
   }
 
@@ -352,18 +350,28 @@ public class GameView extends View implements SensorEventListener {
   }
 
   public void activateMisile(){
+    Graphic missile = new Graphic(this, drawable_missile);
     missile.setPosX(ship.getPosX() + ship.getWidth() / 2 - missile.getWidth() / 2);
     missile.setPosY(ship.getPosY() + ship.getHeight() / 2 - missile.getHeight() / 2);
     missile.setAngle(ship.getAngle());
     missile.setIncX(Math.cos(Math.toRadians(missile.getAngle())) *  MISSILE_VELOCITY_TICK);
     missile.setIncY(Math.sin(Math.toRadians(missile.getAngle())) *  MISSILE_VELOCITY_TICK);
-    missileMs = (int) Math.min(this.getWidth() / Math.abs(missile.getIncX()), this.getHeight() / Math.abs(missile.getIncY())) - 2;
-    missileActive = true;
+
+    int missileMs = (int) Math.min(this.getWidth() / Math.abs(missile.getIncX()), this.getHeight() / Math.abs(missile.getIncY())) - 2;
+
+    missiles.add(missile);
+    missileTimes.add(missileMs);
   }
 
   public void destroyAsteroid(int i){
+    Log.i("[ASTEROIDS]", "Asteroid destroyed");
     asteroids.remove(i);
-    missileActive = false;
+  }
+
+  public void destroyMissile(int i){
+    Log.i("[MISSILES]", "Missile destroyed");
+    missiles.remove(i);
+    missileTimes.remove(i);
   }
 
   public void onTouchEventDown(){

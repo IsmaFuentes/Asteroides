@@ -62,6 +62,10 @@ public class Graphic {
     return this.posY;
   }
 
+  public int getCollisionRadius(){
+    return this.collisionRadius;
+  }
+
   public void setPosX(double x){
     this.posX = x;
   }
@@ -84,6 +88,10 @@ public class Graphic {
 
   public void setRotation(int rotation){
     this.rotation = rotation;
+  }
+
+  public void setCollisionRadius(int radius){
+    this.collisionRadius = radius;
   }
 
   public void incrementPosition(double factor){
