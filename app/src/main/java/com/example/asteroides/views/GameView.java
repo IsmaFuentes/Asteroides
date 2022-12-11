@@ -22,13 +22,14 @@ import android.view.View;
 import androidx.preference.PreferenceManager;
 import com.example.asteroides.R;
 import com.example.asteroides.models.Graphic;
+import com.example.asteroides.models.Missile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameView extends View implements SensorEventListener {
   private List<Graphic> asteroids;
-  private List<Graphic> missiles;
+  private List<Missile> missiles;
   private int asteroidCount = 5;
   private int fragmentCount = 3;
 
@@ -48,7 +49,6 @@ public class GameView extends View implements SensorEventListener {
 
   // MISILES
   private static int MISSILE_VELOCITY_TICK = 12;
-  private List<Integer> missileTimes;
 
   // THREAD + TIMINGS
   private GameThread thread = new GameThread();
@@ -100,8 +100,7 @@ public class GameView extends View implements SensorEventListener {
     ship = new Graphic(this, drawable_ship);
 
     // MISSILE
-    missiles = new ArrayList<Graphic>();
-    missileTimes = new ArrayList<Integer>();
+    missiles = new ArrayList<Missile>();
 
     // ASTEROIDS
     asteroids = new ArrayList<Graphic>();
@@ -249,8 +248,8 @@ public class GameView extends View implements SensorEventListener {
 
     ship.drawGraphic(canvas);
 
-    for(Graphic missile:missiles){
-      missile.drawGraphic(canvas);
+    for(Missile missile:missiles){
+      missile.getGraphic().drawGraphic(canvas);
     }
 
 
@@ -281,17 +280,17 @@ public class GameView extends View implements SensorEventListener {
     ship.incrementPosition(delay);
 
     for(int x = 0; x < missiles.size(); x++){
-      Graphic missile = missiles.get(x);
-      int missileMs = missileTimes.get(x);
+      Missile m = missiles.get(x);
+      int missileMs = m.getMs();
 
-      missile.incrementPosition(delay);
+      m.getGraphic().incrementPosition(delay);
       missileMs -= delay;
-      missileTimes.set(x, missileMs);
-      if (missileMs < 0){ // < 0
+      m.setMs(missileMs);
+      if (missileMs < 0){
         destroyMissile(x);
-      } else{
+      } else {
         for (int i = 0; i < asteroids.size(); i++)
-          if (missile.verifyCollision(asteroids.get(i))) {
+          if (m.getGraphic().verifyCollision(asteroids.get(i))) {
             destroyAsteroid(i);
             destroyMissile(x);
             break;
@@ -350,17 +349,16 @@ public class GameView extends View implements SensorEventListener {
   }
 
   public void activateMisile(){
-    Graphic missile = new Graphic(this, drawable_missile);
-    missile.setPosX(ship.getPosX() + ship.getWidth() / 2 - missile.getWidth() / 2);
-    missile.setPosY(ship.getPosY() + ship.getHeight() / 2 - missile.getHeight() / 2);
-    missile.setAngle(ship.getAngle());
-    missile.setIncX(Math.cos(Math.toRadians(missile.getAngle())) *  MISSILE_VELOCITY_TICK);
-    missile.setIncY(Math.sin(Math.toRadians(missile.getAngle())) *  MISSILE_VELOCITY_TICK);
+    Graphic g = new Graphic(this, drawable_missile);
+    g.setPosX(ship.getPosX() + ship.getWidth() / 2 - g.getWidth() / 2);
+    g.setPosY(ship.getPosY() + ship.getHeight() / 2 - g.getHeight() / 2);
+    g.setAngle(ship.getAngle());
+    g.setIncX(Math.cos(Math.toRadians(g.getAngle())) *  MISSILE_VELOCITY_TICK);
+    g.setIncY(Math.sin(Math.toRadians(g.getAngle())) *  MISSILE_VELOCITY_TICK);
 
-    int missileMs = (int) Math.min(this.getWidth() / Math.abs(missile.getIncX()), this.getHeight() / Math.abs(missile.getIncY())) - 2;
+    int ms = (int) Math.min(this.getWidth() / Math.abs(g.getIncX()), this.getHeight() / Math.abs(g.getIncY())) - 2;
 
-    missiles.add(missile);
-    missileTimes.add(missileMs);
+    missiles.add(new Missile(g, ms));
   }
 
   public void destroyAsteroid(int i){
@@ -371,7 +369,6 @@ public class GameView extends View implements SensorEventListener {
   public void destroyMissile(int i){
     Log.i("[MISSILES]", "Missile destroyed");
     missiles.remove(i);
-    missileTimes.remove(i);
   }
 
   public void onTouchEventDown(){
@@ -395,7 +392,7 @@ public class GameView extends View implements SensorEventListener {
           break;
         case KeyEvent.KEYCODE_DPAD_CENTER:
         case KeyEvent.KEYCODE_ENTER:
-          // TODO: shotMisile
+          activateMisile();
           break;
         default:
           processed = false;
@@ -420,7 +417,7 @@ public class GameView extends View implements SensorEventListener {
           shipAngle = 0;
           break;
         case KeyEvent.KEYCODE_ENTER:
-          // TODO: shotMisile
+          activateMisile();
           break;
         default:
           processed = false;
