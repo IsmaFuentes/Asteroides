@@ -1,6 +1,7 @@
 package com.example.asteroides;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
   private Button configButton;
   private Button playButton;
 
+  private MediaPlayer _mPlayer;
   public static ScoreStore _store;
 
   @Override
@@ -36,6 +38,11 @@ public class MainActivity extends AppCompatActivity {
 
     // Puntuaciones
     _store = new ScoreStore();
+    // Reproducción de música
+    _mPlayer = MediaPlayer.create(this, R.raw.audio);
+    _mPlayer.start();
+
+    Log.i("LIFECYCLE", "CREATE");
   }
 
   @Override
@@ -45,31 +52,41 @@ public class MainActivity extends AppCompatActivity {
     HandleButtonsRegistration();
     // Animations
     HandleAnimations();
+
+    Log.i("LIFECYCLE", "START");
   }
 
   @Override
   protected void onResume(){
     super.onResume();
+    _mPlayer.start();
+    Log.i("LIFECYCLE", "RESUME");
   }
 
   @Override
   protected void onPause(){
     super.onPause();
+    _mPlayer.pause();
+    Log.i("LIFECYCLE", "PAUSE");
   }
 
   @Override
   protected void onStop(){
     super.onStop();
+    Log.i("LIFECYCLE", "STOP");
   }
 
   @Override
   protected void onRestart(){
     super.onRestart();
+    Log.i("LIFECYCLE", "RESTART");
   }
 
   @Override
   protected void onDestroy(){
     super.onDestroy();
+    _mPlayer.stop();
+    Log.i("LIFECYCLE", "DESTROY");
   }
 
   public boolean onCreateOptionsMenu(Menu menu) {
