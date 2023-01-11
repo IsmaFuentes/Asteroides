@@ -16,10 +16,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import androidx.preference.PreferenceManager;
+import com.example.asteroides.Game;
 import com.example.asteroides.R;
 import com.example.asteroides.models.Graphic;
 import com.example.asteroides.models.Missile;
@@ -403,7 +405,7 @@ public class GameView extends View implements SensorEventListener {
     return processed;
   }
 
-  public  boolean onKeyUp(int keyCode, KeyEvent event){
+  public boolean onKeyUp(int keyCode, KeyEvent event){
     super.onKeyUp(keyCode, event);
 
     boolean processed = true;
@@ -428,11 +430,51 @@ public class GameView extends View implements SensorEventListener {
     return processed;
   }
 
+  public GameThread getThread(){
+    return this.thread;
+  }
+
   public class GameThread extends Thread {
+    private boolean isPaused, isRunning;
+
+    public synchronized void Pause(){
+      isPaused = true;
+    }
+
+    public synchronized void Resume(){
+      isPaused = false;
+      notify();
+    }
+
+    public synchronized void Stop(){
+      isRunning = false;
+      if(isPaused){
+        Resume();
+      }
+    }
+
     @Override
     public void run(){
-      while(true){
-        updatePhysics();
+      try{
+        isRunning = true;
+        while(isRunning) {
+          updatePhysics();
+          synchronized (this){
+            while(isPaused){
+              try{
+                Log.i("[GAME THREAD]", "Thread paused");
+                wait();
+              }catch (Exception ex){
+                Log.i("[GAME THREAD] ", ex.getMessage());
+              }
+            }
+          }
+
+          // Para prevenir el uso excesivo de CPU he limitado el número máximo de actualizaciones a 60 por segundo.
+          this.sleep(1000 / 60); // 60fps = 16.6ms
+        }
+      }catch (InterruptedException ex){
+        Log.i("[GAME THREAD] ", ex.getMessage());
       }
     }
   }

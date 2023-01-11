@@ -41,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
     // Reproducción de música
     _mPlayer = MediaPlayer.create(this, R.raw.audio);
     _mPlayer.start();
-
-    Log.i("LIFECYCLE", "CREATE");
   }
 
   @Override
@@ -52,41 +50,34 @@ public class MainActivity extends AppCompatActivity {
     HandleButtonsRegistration();
     // Animations
     HandleAnimations();
-
-    Log.i("LIFECYCLE", "START");
   }
 
   @Override
   protected void onResume(){
     super.onResume();
     _mPlayer.start();
-    Log.i("LIFECYCLE", "RESUME");
   }
 
   @Override
   protected void onPause(){
     super.onPause();
     _mPlayer.pause();
-    Log.i("LIFECYCLE", "PAUSE");
   }
 
   @Override
   protected void onStop(){
     super.onStop();
-    Log.i("LIFECYCLE", "STOP");
   }
 
   @Override
   protected void onRestart(){
     super.onRestart();
-    Log.i("LIFECYCLE", "RESTART");
   }
 
   @Override
   protected void onDestroy(){
-    super.onDestroy();
     _mPlayer.stop();
-    Log.i("LIFECYCLE", "DESTROY");
+    super.onDestroy();
   }
 
   public boolean onCreateOptionsMenu(Menu menu) {
